@@ -7,6 +7,46 @@
         mc:Ignorable="d"
         Title="Simple Calculator - Hugo Timmerman - 2018" Height="406.098" Width="319.268">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" Grid.Column="0" x:Name="History" MinLines="3"/>
+        <TextBox Grid.Row="1" Grid.Column="0" x:Name="Current"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="C" Click="Clear"/>
+            <Button Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="%" Click="Operator"/>
+            <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="€"/>
+            <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="7" Click="Number"/>
+            <Button Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="8" Click="Number"/>
+            <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="9" Click="Number"/>
+            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="4" Click="Number"/>
+            <Button Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="5" Click="Number"/>
+            <Button Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="6" Click="Number"/>
+            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="1" Click="Number"/>
+            <Button Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="2" Click="Number"/>
+            <Button Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="3" Click="Number"/>
+            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="1" Content="0" Click="Number"/>
+            <Button Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="," Click="Comma"/>
+            <Button Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="/" Click="Operator"/>
+            <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="×" Click="Operator"/>
+            <Button Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="-" Click="Operator"/>
+            <Button Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="+" Click="Operator"/>
+            <Button Grid.Row="4" Grid.Column="3" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="=" Click="Solve"/>
+        </Grid>
     </Grid>
 </Window>
