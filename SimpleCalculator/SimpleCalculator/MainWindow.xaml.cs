@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,25 +33,16 @@ namespace SimpleCalculator
         /// A list of values and operators in string format
         /// </summary>
         List<string> Equation = new List<string>();
+        /// <summary>
+        ///  Keeps track if the value should be presented €??,?? instead of ??,??
+        /// </summary>
+        bool EuroToggle = false;
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-        }
-        /// <summary>
-        /// This function gets called when the user clicks on the buttons 0-9,
-        /// </summary>
-        private void Number(object sender, RoutedEventArgs e)
-        {
-            PushBuffer(OperatorBuffer);
-            Button Target = sender as Button;
-            char newval = Target.Content.ToString()[0];
-            ValueBuffer.Add(newval);
-            //Remove Leading 0's
-            while (ValueBuffer.Count > 1 && ValueBuffer[0] == '0' && ValueBuffer[1] == '0')
-            {
-                ValueBuffer.RemoveAt(0);
-            }
-            UpdateCurrent();
         }
         /// <summary>
         /// Pushes the data from the buffer to the Equation
@@ -87,12 +79,29 @@ namespace SimpleCalculator
             {
                 res += item + " ";
             }
-            res += StringifyList(ValueBuffer)+ " ";
-            res += StringifyList(OperatorBuffer)+" ";
+            if (EuroToggle) res += "€ ";
+            res += StringifyList(ValueBuffer) + " ";
+            res += StringifyList(OperatorBuffer) + " ";
             this.Current.Text = res;
         }
         /// <summary>
-        /// This event get's called whenever the ',' Button is pressed
+        /// This function gets called whenever the user enters '0-9'
+        /// </summary>
+        private void Number(object sender, RoutedEventArgs e)
+        {
+            PushBuffer(OperatorBuffer);
+            Button Target = sender as Button;
+            char newval = Target.Content.ToString()[0];
+            ValueBuffer.Add(newval);
+            //Remove Leading 0's
+            while (ValueBuffer.Count > 1 && ValueBuffer[0] == '0' && ValueBuffer[1] == '0')
+            {
+                ValueBuffer.RemoveAt(0);
+            }
+            UpdateCurrent();
+        }
+        /// <summary>
+        /// This function gets called whenever the user enters ','
         /// </summary>
         private void Comma(object sender, RoutedEventArgs e)
         {
@@ -105,58 +114,185 @@ namespace SimpleCalculator
             UpdateCurrent();
         }
         /// <summary>
-        /// This function gets called whenever +,-,×,/
+        /// This function gets called whenever the user enters '+,-,×,/,%'
         /// </summary>
         private void Operator(object sender, RoutedEventArgs e)
         {
-            PushBuffer(ValueBuffer);
+            //try to clear valuebuffer
+            BuffValue();
             Button Target = sender as Button;
-            char newOp = Target.Content.ToString()[0];
-            while (OperatorBuffer.Count >= 2)
+            string NewData = Target.Content.ToString();
+            double arg = 0;
+            if (Equation.Count <= 0 || double.TryParse(Equation[Equation.Count - 1], out arg))
             {
-                OperatorBuffer.RemoveAt(0);
-            }
-            if (OperatorBuffer.Count <= 0)
-            {
-                OperatorBuffer.Add(newOp);
+
+                // Add to array if equation is empty or last entered value was a double
+                Equation.Add(NewData);
             }
             else
             {
-                if (newOp == '-')
+                // >0 and lat value was not a double
+                if (NewData == "-")
                 {
-                    if (OperatorBuffer[0] == '+')
+                    switch (Equation[Equation.Count - 1])
                     {
-                        OperatorBuffer[0] = '-';
-                    }
-                    else
-                    {
-                        if (OperatorBuffer[0] == '-')
-                        {
-                            OperatorBuffer[0] = '+';
-                        }
-                        else
-                        {
-                            OperatorBuffer.Add('-');
-                        }
+                        case "-":
+                            Equation[Equation.Count() - 1] = "+";
+                            break;
+                        case "+":
+                            Equation[Equation.Count - 1] = "-";
+                            break;
+                        default:
+                            Equation.Add(NewData);
+                            break;
                     }
                 }
                 else
                 {
-                    OperatorBuffer[0] = newOp;
+                    while (Equation.Count > 0 && !double.TryParse(Equation[Equation.Count - 1], out arg))
+                    {
+                        Equation.RemoveAt(Equation.Count - 1);
+                    }
+                    Equation.Add(NewData);
+
                 }
             }
+
             UpdateCurrent();
         }
-        private void Solve(object sender, RoutedEventArgs e)
-        {
 
+        private void BuffValue()
+        {
+            if (ValueBuffer.Count > 0 && EuroToggle)
+            {
+                Equation.Add("€");
+                EuroToggle = false;
+            }
+            PushBuffer(ValueBuffer);
         }
 
+        /// <summary>
+        /// This function gets called whenever the user enters '='
+        /// </summary>
+        private void Solve(object sender, RoutedEventArgs e)
+        {
+            bool isValuta = false;
+            BuffValue();
+            List<string> ErasableEquation = new List<string>(Equation);
+            double arg;
+            // Check for divide By 0 errors
+            for (int i = 1; i < Equation.Count; i++)
+            {
+                if (double.TryParse(ErasableEquation[i], out arg) && arg == 0)
+                {
+                    if (ErasableEquation[i - 1] == "/" || ErasableEquation[i - 1] == "€" & ErasableEquation[i - 2] == "/")
+                    {
+                        Clear(sender, e);
+                        this.Current.Text = "DivideByZeroError";
+                        return;
+                    }
+                }
+            }
+            if (ErasableEquation.Contains("€"))
+            {
+                ErasableEquation.RemoveAll(x => x == "€");
+                isValuta = true;
+            }
+            while (!double.TryParse(ErasableEquation.Last(), out arg))
+            {
+                ErasableEquation.RemoveAt(ErasableEquation.Count - 1);
+            }
+            // First pass
+            for (int i = 0; i < ErasableEquation.Count; i++)
+            {
+                if (ErasableEquation[i] == "-")
+                {
+                    double outp = 0;
+                    if (double.TryParse(ErasableEquation[i + 1], out outp))
+                    {
+                        ErasableEquation[i + 1] = (outp * -1).ToString();
+                        ErasableEquation.RemoveAt(i);
+                    }
+                }
+            }
+            double left;
+            double right;
+            for (int i = 1; i < ErasableEquation.Count - 1; i++)
+            {
+                if ("×/%".Contains(ErasableEquation[i]))
+                {
+                    left = double.Parse(ErasableEquation[i - 1]);
+                    right = double.Parse(ErasableEquation[i + 1]);
+                    switch (ErasableEquation[i])
+                    {
+                        case "×":
+                            ErasableEquation[i] = (left * right).ToString();
+                            break;
+                        case "/":
+                            ErasableEquation[i] = (left / right).ToString();
+                            break;
+                        case "%":
+                            ErasableEquation[i] = (left * right * 0.01).ToString();
+                            break;
+                        default:
+                            break;
+                    }
+                    ErasableEquation.RemoveAt(i + 1);
+                    ErasableEquation.RemoveAt(i - 1);
+                    i--;
+                }
+            }
+            for (int i = 1; i < ErasableEquation.Count - 1; i++)
+            {
+                if ("+".Contains(ErasableEquation[i]))
+                {
+                    left = double.Parse(ErasableEquation[i - 1]);
+                    right = double.Parse(ErasableEquation[i + 1]);
+                    switch (ErasableEquation[i])
+                    {
+                        case "+":
+                            ErasableEquation[i] = (left + right).ToString();
+                            break;
+                        case "/":
+                            ErasableEquation[i] = (left / right).ToString();
+                            break;
+                        case "%":
+                            ErasableEquation[i] = (left * right * 0.01).ToString();
+                            break;
+                        default:
+                            break;
+                    }
+                    ErasableEquation.RemoveAt(i + 1);
+                    ErasableEquation.RemoveAt(i - 1);
+                    i--;
+                }
+            }
+            double res = 0;
+            ErasableEquation.RemoveAll(x => "€+/×%-".Contains(x));
+            foreach (var item in ErasableEquation)
+            {
+                res += double.Parse(item);
+            }
+            History.Text += $"{res}\n";
+        }
+        /// <summary>
+        /// This function gets called whenever the user enters 'C'
+        /// </summary>
         private void Clear(object sender, RoutedEventArgs e)
         {
+            //Clear all current values
             ValueBuffer.Clear();
             OperatorBuffer.Clear();
             Equation.Clear();
+            EuroToggle = false;
+            UpdateCurrent();
+        }
+        /// <summary>
+        /// This function gets called whenever the user enters '€'
+        /// </summary>
+        private void EU_Click(object sender, RoutedEventArgs e)
+        {
+            EuroToggle = !EuroToggle;
             UpdateCurrent();
         }
     }

@@ -30,7 +30,7 @@
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="C" Click="Clear"/>
             <Button Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="%" Click="Operator"/>
-            <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="€"/>
+            <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="€" Click="EU_Click"/>
             <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="7" Click="Number"/>
             <Button Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="8" Click="Number"/>
             <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="1" Grid.RowSpan="1" Content="9" Click="Number"/>
